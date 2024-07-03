@@ -29,12 +29,12 @@ export const AppSidebarNav = () => {
     )
   }
 
-  const navItem = (item, index, indent = false) => {
+  const navItem = (item) => {
     const { component, name, badge, icon, ...rest } = item
     return (
-      <a key={item.Id} onClick={}>
-        {item.Name}
-      </a>
+      <div key={item.Id} className="nav-item">
+        <a className="nav-link" href={"#/" + item.Name}><i className={item.Icon}></i>{item.Name}</a>
+      </div>
     )
   }
 

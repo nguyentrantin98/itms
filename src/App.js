@@ -1,6 +1,7 @@
 import React, { Suspense, useEffect } from 'react'
-import { HashRouter, Route, Routes } from 'react-router-dom'
+import { HashRouter, Route, Routes, Navigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
+import { Client } from 'htmljs-code'
 
 import { CSpinner, useColorModes } from '@coreui/react'
 import './scss/style.scss'
@@ -18,6 +19,21 @@ const Page500 = React.lazy(() => import('./views/pages/page500/Page500'))
 const App = () => {
   const { isColorModeSet, setColorMode } = useColorModes('coreui-free-react-admin-template-theme')
   const storedTheme = useSelector((state) => state.theme)
+  const isAuthenticated = useSelector((state) => {
+    if (!state.isAuthenticated) {
+      let oldToken = Client.Token;
+      if (!oldToken || new Date(oldToken.RefreshTokenExp) <= Client.EpsilonNow) {
+        return false;
+      } else if (oldToken && new Date(oldToken.AccessTokenExp) > Client.EpsilonNow) {
+        return true;
+      } else if (oldToken && new Date(oldToken.RefreshTokenExp) > Client.EpsilonNow) {
+        return false;
+      }
+    }
+    else {
+      return state.isAuthenticated
+    }
+  })
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.href.split('?')[1])
@@ -31,7 +47,7 @@ const App = () => {
     }
 
     setColorMode(storedTheme)
-  }, [])
+  })
 
   return (
     <HashRouter>
@@ -43,11 +59,19 @@ const App = () => {
         }
       >
         <Routes>
-          <Route exact path="/login" name="Login Page" element={<Login />} />
-          <Route exact path="/register" name="Register Page" element={<Register />} />
-          <Route exact path="/404" name="Page 404" element={<Page404 />} />
-          <Route exact path="/500" name="Page 500" element={<Page500 />} />
-          <Route path="*" name="Home" element={<DefaultLayout />} />
+          {!isAuthenticated ? (
+            <>
+              <Route exact path="/login" name="Login Page" element={<Login />} />
+              <Route exact path="/register" name="Register Page" element={<Register />} />
+              <Route path="*" element={<Navigate to="/login" />} />
+            </>
+          ) : (
+            <>
+              <Route exact path="/404" name="Page 404" element={<Page404 />} />
+              <Route exact path="/500" name="Page 500" element={<Page500 />} />
+              <Route path="*" name="Home" element={<DefaultLayout />} />
+            </>
+          )}
         </Routes>
       </Suspense>
     </HashRouter>

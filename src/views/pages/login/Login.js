@@ -1,5 +1,5 @@
 import React from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import {
   CButton,
   CCard,
@@ -15,8 +15,42 @@ import {
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 import { cilLockLocked, cilUser } from '@coreui/icons'
+import { Client } from 'htmljs-code'
+import { Toast } from 'htmljs-code/lib/toast'
+import { useSelector, useDispatch } from 'react-redux'
 
 const Login = () => {
+  const dispatch = useDispatch()
+  const navigate = useNavigate()
+  const userName = useSelector((state) => state.UserName ?? "johndoe");
+  const password = useSelector((state) => state.Password ?? "secret");
+  const handlerLogin = async () => {
+    var res = await Client.Instance.SubmitAsync({
+      Url: `/api/auth/login`,
+      JsonData: JSON.stringify({
+        UserName: userName,
+        TanentCode: "dev",
+        AutoSignIn: true,
+        Password: password
+      }),
+      IsRawString: true,
+      Method: "POST",
+      AllowAnonymous: true,
+    });
+    Client.Token = res.token;
+    dispatch({ type: 'set', isAuthenticated: true });
+    navigate('/home');
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    if (name === 'UserName') {
+      dispatch({ type: 'set', UserName: value })
+    } else if (name === 'Password') {
+      dispatch({ type: 'set', Password: value })
+    }
+  };
+
   return (
     <div className="bg-body-tertiary min-vh-100 d-flex flex-row align-items-center">
       <CContainer>
@@ -32,21 +66,28 @@ const Login = () => {
                       <CInputGroupText>
                         <CIcon icon={cilUser} />
                       </CInputGroupText>
-                      <CFormInput placeholder="Username" autoComplete="username" />
+                      <CFormInput
+                        placeholder="UserName"
+                        value={userName}
+                        name="UserName"
+                        onInput={handleInputChange} />
                     </CInputGroup>
                     <CInputGroup className="mb-4">
                       <CInputGroupText>
                         <CIcon icon={cilLockLocked} />
                       </CInputGroupText>
                       <CFormInput
+                        value={password}
+                        name="Password"
                         type="password"
+                        onInput={handleInputChange}
                         placeholder="Password"
                         autoComplete="current-password"
                       />
                     </CInputGroup>
                     <CRow>
                       <CCol xs={6}>
-                        <CButton color="primary" className="px-4">
+                        <CButton color="primary" className="px-4" onClick={handlerLogin}>
                           Login
                         </CButton>
                       </CCol>
