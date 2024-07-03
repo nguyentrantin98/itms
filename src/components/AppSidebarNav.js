@@ -1,23 +1,24 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { NavLink } from 'react-router-dom'
-import PropTypes from 'prop-types'
+import { useSelector, useDispatch } from 'react-redux'
 
 import SimpleBar from 'simplebar-react'
 import 'simplebar-react/dist/simplebar.min.css'
 
 import { CBadge, CNavLink, CSidebarNav } from '@coreui/react'
+import { Client, Feature } from 'htmljs-code'
 
-export const AppSidebarNav = ({ items }) => {
+export const AppSidebarNav = () => {
   const navLink = (name, icon, badge, indent = false) => {
     return (
       <>
         {icon
           ? icon
           : indent && (
-              <span className="nav-icon">
-                <span className="nav-icon-bullet"></span>
-              </span>
-            )}
+            <span className="nav-icon">
+              <span className="nav-icon-bullet"></span>
+            </span>
+          )}
         {name && name}
         {badge && (
           <CBadge color={badge.color} className="ms-auto">
@@ -56,14 +57,25 @@ export const AppSidebarNav = ({ items }) => {
     )
   }
 
+
+  const dispatch = useDispatch()
+  const features = useSelector((state) => state.features)
+  useEffect(() => {
+    async function fetchData() {
+      let fes = await Client.Instance.SubmitAsync({
+        Url: `/api/feature/getMenu`,
+        IsRawString: true,
+        Method: "GET"
+      });
+      dispatch({ type: 'set', features: fes })
+    }
+    fetchData();
+  }, [])
+
   return (
     <CSidebarNav as={SimpleBar}>
-      {items &&
-        items.map((item, index) => (item.items ? navGroup(item, index) : navItem(item, index)))}
+      {features &&
+        features.map((item, index) => (item.items ? navGroup(item, index) : navItem(item, index)))}
     </CSidebarNav>
   )
-}
-
-AppSidebarNav.propTypes = {
-  items: PropTypes.arrayOf(PropTypes.any).isRequired,
 }

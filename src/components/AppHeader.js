@@ -43,7 +43,7 @@ const AppHeader = () => {
   }, [])
 
   return (
-    <CHeader position="sticky" className="mb-4 p-0" ref={headerRef}>
+    <CHeader position="sticky" className="p-0" ref={headerRef}>
       <CContainer className="border-bottom px-4" fluid>
         <CHeaderToggler
           onClick={() => dispatch({ type: 'set', sidebarShow: !sidebarShow })}
@@ -51,9 +51,6 @@ const AppHeader = () => {
         >
           <CIcon icon={cilMenu} size="lg" />
         </CHeaderToggler>
-        <div className="chrome-tabs d-none d-md-flex">
-          <div className="chrome-tabs-content"></div>
-        </div>
         <CHeaderNav className="ms-auto">
           <CNavItem>
             <CNavLink href="#">
@@ -121,8 +118,10 @@ const AppHeader = () => {
           <AppHeaderDropdown />
         </CHeaderNav>
       </CContainer>
-      <CContainer className="px-4" fluid>
-        <AppBreadcrumb />
+      <CContainer className="px-4  d-none d-md-flex" fluid>
+        <div className="chrome-tabs">
+          <div className="chrome-tabs-content"></div>
+        </div>
       </CContainer>
     </CHeader>
   )
